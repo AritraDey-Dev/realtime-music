@@ -7,6 +7,8 @@ import songRouter from './routes/song.route.js';
 import albumRouter from './routes/album.route.js';
 import statsRouter from './routes/stat.route.js';
 import connectDB from './lib/db.js';
+import {clerkMiddleware} from '@clerk/express';
+
 
 const app=express();
 
@@ -18,7 +20,7 @@ const PORT=process.env.PORT || 5000;
 app.get('/',(req,res)=>{
     res.send('Hello World!');
 });
-
+app.use(clerkMiddleware());
 app.use("/api/users",userRouter)
 app.use("/api/auth",authRouter)
 app.use("/api/admin",adminRouter)
