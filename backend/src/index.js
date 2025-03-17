@@ -6,9 +6,11 @@ import adminRouter from './routes/admin.route.js';
 import songRouter from './routes/song.route.js';
 import albumRouter from './routes/album.route.js';
 import statsRouter from './routes/stat.route.js';
+import connectDB from './lib/db.js';
 
 const app=express();
 
+app.use(express.json());
 
 dotenv.config();
 const PORT=process.env.PORT || 5000;
@@ -26,4 +28,5 @@ app.use("/api/stats",statsRouter)
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
+    connectDB();
 });
