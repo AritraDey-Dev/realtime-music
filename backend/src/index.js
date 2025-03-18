@@ -8,11 +8,27 @@ import albumRouter from './routes/album.route.js';
 import statsRouter from './routes/stat.route.js';
 import connectDB from './lib/db.js';
 import {clerkMiddleware} from '@clerk/express';
+import fileUpload from 'express-fileupload';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 
 const app=express();
 
 app.use(express.json());
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(fileUpload({
+    useTempFiles: true,
+    tempFileDir: path.join(__dirname, 'tmp'),
+    createParentPath: true,
+    limits: {
+        fileSize: 1024 * 1024 * 10,
+    },
+}));
+
 
 dotenv.config();
 const PORT=process.env.PORT || 5000;
@@ -27,6 +43,10 @@ app.use("/api/admin",adminRouter)
 app.use("/api/songs",songRouter)
 app.use("/api/albums",albumRouter)
 app.use("/api/stats",statsRouter)
+
+app.use((err,req,res,next)=>{
+    res.status(500).json({message: process.env.NODE_ENV==='production'?'Internal server error':err.message});
+});
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
