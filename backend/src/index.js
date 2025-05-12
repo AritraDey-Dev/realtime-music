@@ -11,12 +11,17 @@ import {clerkMiddleware} from '@clerk/express';
 import fileUpload from 'express-fileupload';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors';
 
-
+dotenv.config();
 const app=express();
+app.use(clerkMiddleware());
 
 app.use(express.json());
-
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -30,7 +35,6 @@ app.use(fileUpload({
 }));
 
 
-dotenv.config();
 const PORT=process.env.PORT || 5000;
 
 app.get('/',(req,res)=>{
