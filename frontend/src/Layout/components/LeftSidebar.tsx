@@ -3,7 +3,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useMusicStore } from '@/stores/useMusicStore'
 import { SignedIn } from '@clerk/clerk-react'
-import { ScrollArea } from '@radix-ui/react-scroll-area'
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { HomeIcon, Library, MessageCircle } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'

@@ -1,10 +1,12 @@
-import { SignedIn, SignedOut, SignOutButton } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, SignOutButton, UserButton } from '@clerk/clerk-react'
 import { LayoutDashboardIcon } from 'lucide-react'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import SignedInAuthButton from './SignedInAuthButton'
+import { useAuthStore } from '@/stores/useAuthStore'
 const Topbar = () => {
-    const isAdmin = false;
+    const isAdmin = useAuthStore();
+    console.log(isAdmin)
     return (
         <div className='flex 
     items-center 
@@ -28,6 +30,7 @@ const Topbar = () => {
                 <SignedOut>
                     <SignedInAuthButton/>
                 </SignedOut>
+                <UserButton />
             </div>
         </div>
     )
