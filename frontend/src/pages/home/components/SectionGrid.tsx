@@ -11,6 +11,7 @@ isLoading:boolean;
 
 }
 const SectionGrid = ({songs,title,isLoading}:SectionGridProps) => {
+    console.log("songs",songs)
     if (isLoading) return <SectionGridSkeleton />;
   return (
     <div className='mb-8'>

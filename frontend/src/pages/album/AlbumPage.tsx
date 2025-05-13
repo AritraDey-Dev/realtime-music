@@ -16,10 +16,12 @@ export const formatDuration = (seconds: number) => {
 const AlbumPage = () => {
     const {id}=useParams();
     const {  fetchAlbumById,currentAlbum}=useMusicStore();
+    console
     useEffect(() => {
         if(id) fetchAlbumById(id);
         console.log(id)
     }, [id]);
+    console.log(currentAlbum)
 const { currentSong, isPlaying, playAlbum, togglePlay } = usePlayerStore();
     
 	const handlePlayAlbum = () => {
@@ -29,7 +31,7 @@ const { currentSong, isPlaying, playAlbum, togglePlay } = usePlayerStore();
 		if (isCurrentAlbumPlaying) togglePlay();
 		else {
 			// start playing the album from the beginning
-			playAlbum(currentAlbum?.songs, 0);
+			playAlbum(currentAlbum.songs, 0);
 		}
 	};
 
