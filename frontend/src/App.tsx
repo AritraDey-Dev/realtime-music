@@ -10,11 +10,14 @@ import AuthCallbackPage from './pages/auth-callback/AuthCallback';
 import MainLayout from './Layout/mainLayout';
 import ChatPage from './pages/chatPage/ChatPage';
 import AlbumPage from './pages/album/AlbumPage';
+import AdminPage from './pages/admin/AdminPage';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
 
 
   return (
+  <>
     <Routes>
       <Route
         path='/sso-callback'
@@ -22,6 +25,8 @@ function App() {
           signUpForceRedirectUrl={"/auth-callback"} />}
       />
       <Route path="/auth-callback" element={<AuthCallbackPage />} />
+      <Route path="/admin" element={<AdminPage />} />
+
 
       <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
@@ -29,6 +34,8 @@ function App() {
           <Route path='/albums/:id' element={<AlbumPage />} />
       </Route>
     </Routes>
+    <Toaster/>
+    </>
   )
 }
 
