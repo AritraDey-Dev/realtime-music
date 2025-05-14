@@ -17,6 +17,10 @@ dotenv.config();
 const app=express();
 app.use(clerkMiddleware());
 
+const httpServer=createServer(app);
+
+initializeSocket(httpServer);
+
 app.use(express.json());
 app.use(cors({
     origin: "http://localhost:5173",
@@ -52,7 +56,7 @@ app.use((err,req,res,next)=>{
     res.status(500).json({message: process.env.NODE_ENV==='production'?'Internal server error':err.message});
 });
 
-app.listen(PORT,()=>{
+httpServer.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
     connectDB();
 });
