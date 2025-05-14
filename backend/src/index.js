@@ -12,6 +12,8 @@ import fileUpload from 'express-fileupload';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
+import { createServer } from 'http';
+import { initializeSocket } from './lib/socket.js';
 
 dotenv.config();
 const app=express();
