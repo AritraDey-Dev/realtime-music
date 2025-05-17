@@ -1,5 +1,4 @@
 import { useSignIn } from '@clerk/clerk-react';
-import React from 'react'
 import { Button } from './ui/button';
 
 const SignedInAuthButton = () => {
@@ -17,10 +16,10 @@ const SignedInAuthButton = () => {
   };
 
   return (
-    <Button onClick={signInwithoogle} variant={"secondary"}
-    className='w-full text-white border-zinc-200 h-1'>
-      Continue with Google
-    </Button>
+	<Button onClick={signInwithoogle} variant={"secondary"} className='text-white border-zinc-200 h-11'>
+			<img src='/google.png' alt='Google' className='size-5' />
+			Continue with Google
+		</Button>
   );
 }
 

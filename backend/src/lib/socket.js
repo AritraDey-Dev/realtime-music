@@ -1,69 +1,74 @@
-import { Server } from 'socket.io';
-import { Message } from '../models/message.model.js';
+import { Server } from "socket.io";
+import { Message } from "../models/message.model.js";
 
 export const initializeSocket = (server) => {
-    const io = new Server(server, {
-        cors: {
-            origin: 'http://localhost:5173',
-            credentials: true,
-        }
-    })
+	const io = new Server(server, {
+		cors: {
+			origin: "http://localhost:5173",
+			credentials: true,
+		},
+	});
 
-    const userSocket = new Map();
-    const userActivites = new Map();
+	const userSockets = new Map(); // { userId: socketId}
+	const userActivities = new Map(); // {userId: activity}
 
-    // io -->server
-    // socket --> client
+	io.on("connection", (socket) => {
+		console.log("New socket connection", socket.id);
+		socket.on("user_connected", (userId) => {
+			userSockets.set(userId, socket.id);
+			userActivities.set(userId, "Idle");
 
-    io.on('connection', (socket) => {
-        socket.on("user_connected", ({ userId }) => {
-            userSocket.set(userId, socket.id);
-            userActivites.set(socket.id, "Idle");
-            io.emit("user_connected", { userId });
-            socket.emit("users_online",Array.from(userSocket.keys()));
-            io.emit("user_activities", Array.from(userActivites.entries()));
+			// broadcast to all connected sockets that this user just logged in
+			io.emit("user_connected", userId);
 
-        })
-        socket.on("update_activity", ({ userId, activity }) => {
-            userActivites.set(userSocket.get(userId), activity);
-            io.emit("user_activitiy",{userId, activity});
-        })
+			socket.emit("users_online", Array.from(userSockets.keys()));
 
-        socket.on("send_message",async(data)=>{
-            try{
-                const {senderId, receiverId, message} = data;
-                const newMessage = await Message.create({
-                    sender: senderId,
-                    receiver: receiverId,
-                    message
-                });
-                const receiverSocketId = userSocket.get(receiverId);
-                if(receiverSocketId){
-                    io.to(receiverSocketId).emit("receive_message", newMessage);
-                }
-                socket.emit("message_sent", newMessage);
-            }catch(error){
-                console.error("error in sending message", error);
-                socket.emit("message_error", {message: "Internal server error"});
-            }
-        })
+			io.emit("activities", Array.from(userActivities.entries()));
+		});
 
-        socket.on("disconnect", () => {
-            let disconnectedUserId;
-            for( const [userId,socketId] of userSocket.entries()){
-                if(socketId === socket.id){
-                    disconnectedUserId = userId;
-                    userSocket.delete(userId);
-                    userActivites.delete(socket.id);
-                    break;
-                }
+		socket.on("update_activity", ({ userId, activity }) => {
+			console.log("activity updated", userId, activity);
+			userActivities.set(userId, activity);
+			io.emit("activity_updated", { userId, activity });
+		});
 
-            }
-            if(disconnectedUserId){
-                io.emit("user_disconnected", { userId: disconnectedUserId });
-            }
-        })
+		socket.on("send_message", async (data) => {
+			try {
+				const { senderId, receiverId, content } = data;
 
-    });
+				const message = await Message.create({
+					senderId,
+					receiverId,
+					content,
+				});
 
-}
+				// send to receiver in realtime, if they're online
+				const receiverSocketId = userSockets.get(receiverId);
+				if (receiverSocketId) {
+					io.to(receiverSocketId).emit("receive_message", message);
+				}
+
+				socket.emit("message_sent", message);
+			} catch (error) {
+				console.error("Message error:", error);
+				socket.emit("message_error", error.message);
+			}
+		});
+
+		socket.on("disconnect", () => {
+			let disconnectedUserId;
+			for (const [userId, socketId] of userSockets.entries()) {
+				// find disconnected user
+				if (socketId === socket.id) {
+					disconnectedUserId = userId;
+					userSockets.delete(userId);
+					userActivities.delete(userId);
+					break;
+				}
+			}
+			if (disconnectedUserId) {
+				io.emit("user_disconnected", disconnectedUserId);
+			}
+		});
+	});
+};

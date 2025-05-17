@@ -17,7 +17,6 @@ import { initializeSocket } from './lib/socket.js';
 
 dotenv.config();
 const app=express();
-app.use(clerkMiddleware());
 
 const httpServer=createServer(app);
 
@@ -28,6 +27,7 @@ app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
 }));
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -44,7 +44,7 @@ app.use(fileUpload({
 const PORT=process.env.PORT || 5000;
 
 app.get('/',(req,res)=>{
-    res.send('Hello World!');
+    res.send('Music App Backend is up and running!')
 });
 app.use(clerkMiddleware());
 app.use("/api/users",userRouter)
