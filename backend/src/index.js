@@ -6,6 +6,7 @@ import adminRouter from './routes/admin.route.js';
 import songRouter from './routes/song.route.js';
 import albumRouter from './routes/album.route.js';
 import statsRouter from './routes/stat.route.js';
+import playlistRouter from './routes/playlist.route.js';
 import connectDB from './lib/db.js';
 import {clerkMiddleware} from '@clerk/express';
 import fileUpload from 'express-fileupload';
@@ -51,6 +52,7 @@ app.use("/api/users",userRouter)
 app.use("/api/auth",authRouter)
 app.use("/api/admin",adminRouter)
 app.use("/api/songs",songRouter)
+app.use("/api/plalists",playlistRouter)
 app.use("/api/albums",albumRouter)
 app.use("/api/stats",statsRouter)
 

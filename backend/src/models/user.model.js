@@ -14,7 +14,22 @@ clerkId: {
     required: true,
     unique: true,
 },
-
+likedSongs: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Song',
+}],
+playlists: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Playlist',
+}],
+friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+}],
+friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+}],
 },{timestamps: true});
 
 export const User = mongoose.model('User', userSchema);
