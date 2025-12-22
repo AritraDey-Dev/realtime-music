@@ -2,7 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useMusicStore } from '@/stores/useMusicStore';
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { Heart, Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from 'lucide-react';
+import { useVisualizerStore } from '@/stores/useVisualizerStore';
+import { Activity, Heart, Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from 'lucide-react';
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom';
 
@@ -16,6 +17,7 @@ const formatTime = (seconds: number) => {
 const PlayBackControls = () => {
     const { isPlaying, currentSong, togglePlay, playNext, playPrevious } = usePlayerStore()
 	const { likeSong } = useMusicStore();
+	const { toggleVisualizer } = useVisualizerStore();
     const [volume, setVolume] = React.useState(50);
     const [currentTime, setCurrentTime] = React.useState(0);
     const [duration, setDuration] = React.useState(0);
@@ -159,6 +161,15 @@ const handleLikeSong = async () => {
 					</Button>
 					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
 						<Laptop2 className='h-4 w-4' />
+					</Button>
+
+					<Button 
+						size='icon' 
+						variant='ghost' 
+						className='hover:text-white text-zinc-400'
+						onClick={toggleVisualizer}
+					>
+						<Activity className='h-4 w-4' />
 					</Button>
 
 					<div className='flex items-center gap-2'>

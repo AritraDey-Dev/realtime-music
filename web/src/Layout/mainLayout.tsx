@@ -8,6 +8,8 @@ import PlayBackControls from './components/PlayBackControls';
 import { usePlayerStore } from '@/stores/usePlayerStore';
 import { useChatStore } from '@/stores/useChatStore';
 
+import AudioVisualizer from '@/components/AudioVisualizer';
+
 const MainLayout = () => {
     const [isMobile, setIsMobile] = useState(false);
     const { currentSong, isPlaying } = usePlayerStore();
@@ -35,6 +37,7 @@ const MainLayout = () => {
 
     return (
         <div className='h-screen bg-black text-white flex flex-col' >
+            <AudioVisualizer />
             <ResizablePanelGroup direction='horizontal' className='flex-1 flex h-full overflow-hidden p-2'>
                 <AudioPlayer/>
                 <ResizablePanel defaultSize={20} minSize={isMobile ? 0 : 10} maxSize={30}>

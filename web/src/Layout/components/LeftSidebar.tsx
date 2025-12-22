@@ -9,6 +9,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CreatePlaylistButton } from '@/components/CreatePlaylistButton'
 import Allplaylists from '@/components/Allplaylists'
+import { PartyControl } from './PartyControl';
 
 const LeftSidebar = () => {
     const { albums,fetchAlbums,isLoading}=useMusicStore();
@@ -45,6 +46,7 @@ const LeftSidebar = () => {
                             <MessageCircle className='mr-2 size-5' />
                             <span className='hidden md:inline text-white'>Messages</span>
                         </Link>
+                        <PartyControl />
                     </SignedIn>
                 </div>
 
