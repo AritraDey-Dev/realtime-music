@@ -22,6 +22,10 @@ description: {
         ref: 'User',
         required: true,
     },
+    isPublic: {
+        type: Boolean,
+        default: true,
+    },
 }, { timestamps: true });
 
 export const Playlist = mongoose.model('Playlist', playlistSchema);

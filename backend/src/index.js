@@ -52,7 +52,7 @@ app.use("/api/users",userRouter)
 app.use("/api/auth",authRouter)
 app.use("/api/admin",adminRouter)
 app.use("/api/songs",songRouter)
-app.use("/api/plalists",playlistRouter)
+app.use("/api/playlists",playlistRouter)
 app.use("/api/albums",albumRouter)
 app.use("/api/stats",statsRouter)
 

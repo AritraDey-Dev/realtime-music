@@ -6,12 +6,9 @@ const router = Router();
 
 router.get('/',protectedRoute,getAllUsers);
 router.get("/messages/:userId", protectedRoute, getMessages);
-router.get("/likedSongs/:id", protectedRoute, getLikedSongs);
+router.get("/likedSongs", protectedRoute, getLikedSongs);
 router.get("/playlists/:id", protectedRoute, getPlaylists);
 router.post('/:id', protectedRoute, likeSong);
-router.post('followrequest/:id', protectedRoute, friendsRequest);
-
-
-
+router.post('/followrequest/:id', protectedRoute, friendsRequest);
 
 export default router;

@@ -23,6 +23,9 @@ interface MusicStore {
 	fetchSongs: () => Promise<void>;
 	deleteSong: (id: string) => Promise<void>;
 	deleteAlbum: (id: string) => Promise<void>;
+	getLikedSongs: () => Promise<void>;
+	likeSong: (id: string) => Promise<void>;
+	searchSongs: (query: string) => Promise<Song[]>;
 }
 
 export const useMusicStore = create<MusicStore>((set) => ({
@@ -156,6 +159,66 @@ export const useMusicStore = create<MusicStore>((set) => ({
 			set({ trendingSongs: response.data.songs });
 		} catch (error: any) {
 			set({ error: error.response.data.message });
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+	getLikedSongs: async () => {
+		set({ isLoading: true, error: null });
+		try {
+			const response = await axiosInstance.get("/users/likedSongs");
+			set({ songs: response.data.songs });
+		} catch (error: any) {
+			set({ error: error.response.data.message });
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+likeSong: async (id) => {
+	set({ isLoading: true, error: null });
+	try {
+		const response = await axiosInstance.post(`/users/${id}`);
+		const { liked, songs } = response.data;
+
+		// Optional: update store
+		// if (songs) {
+		// 	set({ songs });
+		// }
+
+		// Show appropriate toast
+		if (liked) {
+			toast.success("Song liked ❤️");
+		} else {
+			toast("Song unliked 💔", { icon: "💔" });
+		}
+
+	} catch (error: any) {
+		set({ error: error?.response?.data?.message || "Something went wrong" });
+		toast.error(error?.response?.data?.message || "Failed to toggle like");
+	} finally {
+		set({ isLoading: false });
+	}
+}
+,
+	// friendsRequest: async (id) => {
+	// 	set({ isLoading: true, error: null });
+	// 	try {
+	// 		const response = await axiosInstance.post(`/users/followrequest/${id}`);
+	// 		set
+	// 	} catch (error: any) {
+	// 		set({ error: error.response.data.message });
+	// 	} finally {
+	// 		set({ isLoading: false });
+	// 	}
+	// }
+	searchSongs: async (query: string) => {
+		set({ isLoading: true, error: null });
+		try {
+			const response = await axiosInstance.get(`/songs/search?query=${query}`);
+			return response.data.songs;
+		} catch (error: any) {
+			set({ error: error.response.data.message });
+			return [];
 		} finally {
 			set({ isLoading: false });
 		}

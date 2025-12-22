@@ -4,9 +4,11 @@ import { cn } from '@/lib/utils'
 import { useMusicStore } from '@/stores/useMusicStore'
 import { SignedIn } from '@clerk/clerk-react'
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { HomeIcon, Library, MessageCircle } from 'lucide-react'
+import { Album, HomeIcon, Library, MessageCircle } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { CreatePlaylistButton } from '@/components/CreatePlaylistButton'
+import Allplaylists from '@/components/Allplaylists'
 
 const LeftSidebar = () => {
     const { albums,fetchAlbums,isLoading}=useMusicStore();
@@ -51,8 +53,8 @@ const LeftSidebar = () => {
             <div className='flex-1 rounded-lg bg-zinc-900 p-4'>
 				<div className='flex items-center justify-between mb-4'>
 					<div className='flex items-center text-white px-2'>
-						<Library className='size-5 mr-2' />
-						<span className='hidden md:inline'>Playlists</span>
+						<Album className='size-5 mr-2' />
+						<span className='hidden md:inline'>Albums</span>
 					</div>
 				</div>
                 <ScrollArea className='h-[calc(100vh-300px)]'>
@@ -80,6 +82,8 @@ const LeftSidebar = () => {
 							))
 						)}
 					</div>
+        <CreatePlaylistButton />
+        <Allplaylists />
 				</ScrollArea>
         </div>
                         </div>

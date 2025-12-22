@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { useMusicStore } from '@/stores/useMusicStore';
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from 'lucide-react';
+import { Heart, Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from 'lucide-react';
 import React, { useEffect } from 'react'
 
 
@@ -13,10 +14,24 @@ const formatTime = (seconds: number) => {
 
 const PlayBackControls = () => {
     const { isPlaying, currentSong, togglePlay, playNext, playPrevious } = usePlayerStore()
+	const { likeSong,isLoading,error } = useMusicStore();
     const [volume, setVolume] = React.useState(50);
     const [currentTime, setCurrentTime] = React.useState(0);
     const [duration, setDuration] = React.useState(0);
     const audioRef = React.useRef<HTMLAudioElement>(null);
+	const [liked, setLiked] = React.useState(false);
+
+	// console.log("currentSong", currentSong);
+const handleLikeSong = async () => {
+	if (!currentSong) return;
+	try {
+		await likeSong(currentSong._id); // backend should toggle like
+		setLiked((prev) => !prev); // toggle local liked state
+	} catch (error) {
+		console.log("Error in likeSong", error);
+	}
+};
+
 
     useEffect(() => {
         audioRef.current = document.querySelector('audio');
@@ -67,6 +82,10 @@ const PlayBackControls = () => {
 						</>
 					)}
 				</div>
+				<Button onClick={handleLikeSong} className='bg-white mr-20 hover:bg-white/80  text-black rounded-full h-8 w-8'>
+	<Heart className={liked ? 'fill-red-500 stroke-red-500' : ''} />
+</Button>
+
 
 				{/* player controls*/}
 				<div className='flex flex-col items-center gap-2 flex-1 max-w-full sm:max-w-[45%]'>

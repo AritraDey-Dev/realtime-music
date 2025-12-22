@@ -13,6 +13,7 @@ interface PlayerStore {
     togglePlay: () => void;
     playNext: () => void;
     playPrevious: () => void;
+    addToQueue: (songs: Song[]) => void;
 }
 
 export const usePlayerStore = create<PlayerStore>((set,get) => ({
@@ -20,6 +21,12 @@ export const usePlayerStore = create<PlayerStore>((set,get) => ({
     isPlaying: false,
     queue: [],
     currentIndex: 0,
+
+    addToQueue: (songs: Song[]) => {
+        const { queue } = get();
+        const newQueue = [...queue, ...songs];
+        set({ queue: newQueue });
+    },
 
     initializedQueue: (songs:Song[]) => {
         set({

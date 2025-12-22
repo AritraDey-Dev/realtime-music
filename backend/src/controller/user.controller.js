@@ -34,7 +34,7 @@ export const getMessages=async(req,res,next)=>{
 }
 
 export const getLikedSongs=async(req,res,next)=>{
-const {id} = req.params;
+const id=req.auth.userId;
 	try {
 		const user = await User.findById(id).populate('likedSongs');
 		if (!user) {
@@ -69,6 +69,7 @@ export const getPlaylists=async(req,res,next)=>{
 export const likeSong = async (req, res, next) => {
     const { id } = req.params;
     const clerkUserId = req.auth.userId;
+	console.log('clerkUserId',clerkUserId);
 
     try {
         const song = await Song.findById(id);
@@ -85,21 +86,22 @@ export const likeSong = async (req, res, next) => {
             (songId) => songId.toString() === id
         );
 
-        if (isLiked) {
-            // Unlike
-            user.likedSongs = user.likedSongs.filter(
-                (songId) => songId.toString() !== id
-            );
-            song.likes = Math.max(0, song.likes - 1); // Prevent negative count
-            await Promise.all([user.save(), song.save()]);
-            return res.status(200).json({ message: 'Song unliked' });
-        } else {
-            // Like
-            user.likedSongs.push(id);
-            song.likes += 1;
-            await Promise.all([user.save(), song.save()]);
-            return res.status(200).json({ message: 'Song liked' });
-        }
+if (isLiked) {
+    // Unlike
+    user.likedSongs = user.likedSongs.filter(
+        (songId) => songId.toString() !== id
+    );
+    song.likes = Math.max(0, song.likes - 1);
+    await Promise.all([user.save(), song.save()]);
+    return res.status(200).json({ liked: false, message: 'Song unliked' });
+} else {
+    // Like
+    user.likedSongs.push(id);
+    song.likes += 1;
+    await Promise.all([user.save(), song.save()]);
+    return res.status(200).json({ liked: true, message: 'Song liked' });
+}
+
     } catch (error) {
         console.error('Error in liking song:', error);
         res.status(500).json({ message: 'Internal server error' });
