@@ -14,6 +14,7 @@ import AdminPage from './pages/admin/AdminPage';
 import { Toaster } from 'react-hot-toast';
 import PlaylistPage from './pages/playlist/Playlist';
 import SearchPage from './pages/search/SearchPage';
+import ProfilePage from './pages/profile/ProfilePage';
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
           <Route path='/albums/:id' element={<AlbumPage />} />
           <Route path="/playlists/:id" element={<PlaylistPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
       </Route>
     </Routes>
     <Toaster/>

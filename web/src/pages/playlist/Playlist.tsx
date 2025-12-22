@@ -22,7 +22,7 @@ const SortableSongRow = ({ song, index, isPlaying, currentSong, playAlbum, handl
         transform,
         transition,
         isDragging
-    } = useSortable({ id: song._id });
+    } = useSortable({ id: `${song._id}-${index}` });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -121,8 +121,8 @@ const Playlist = () => {
         const { active, over } = event;
         
         if (over && active.id !== over.id && currentPlaylist) {
-            const oldIndex = currentPlaylist.songs.findIndex((song) => song._id === active.id);
-            const newIndex = currentPlaylist.songs.findIndex((song) => song._id === over.id);
+            const oldIndex = currentPlaylist.songs.findIndex((song, i) => `${song._id}-${i}` === active.id);
+            const newIndex = currentPlaylist.songs.findIndex((song, i) => `${song._id}-${i}` === over.id);
             
             if (oldIndex !== -1 && newIndex !== -1) {
                 const newOrder = arrayMove(currentPlaylist.songs, oldIndex, newIndex);
@@ -249,13 +249,13 @@ const Playlist = () => {
                     onDragEnd={handleDragEnd}
                 >
                     <SortableContext 
-                        items={currentPlaylist.songs.map(s => s._id)} 
+                        items={currentPlaylist.songs.map((s, i) => `${s._id}-${i}`)} 
                         strategy={verticalListSortingStrategy}
                     >
                         <div className='space-y-2'>
                             {currentPlaylist.songs.map((song, index) => (
                                 <SortableSongRow
-                                    key={song._id}
+                                    key={`${song._id}-${index}`}
                                     song={song}
                                     index={index}
                                     isPlaying={isPlaying}

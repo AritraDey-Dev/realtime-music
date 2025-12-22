@@ -8,6 +8,7 @@ export interface Song{
     duration: number,
     createdAt: Date,
     updatedAt: Date,
+    lyrics?: string,
 }
 
 
@@ -41,7 +42,7 @@ export interface User {
 	clerkId: string;
 	fullName: string;
 	imageUrl: string;
-    likedSongs: string[];
+    likedSongs: Song[];
 	playlists: string[];
 	friends: string[];
 }

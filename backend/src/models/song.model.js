@@ -29,6 +29,10 @@ const songSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    lyrics: {
+        type: String,
+        required: false,
+    },
 }, { timestamps: true });
 
 export const Song = mongoose.model('Song', songSchema);

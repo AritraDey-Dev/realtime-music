@@ -1,5 +1,6 @@
 import { Song } from "../models/song.model.js";
 import { User } from "../models/user.model.js"
+import { Playlist } from "../models/playlist.model.js";
 
 export const getAllUsers = async (req, res,next) => {
     try {
@@ -131,4 +132,26 @@ export const friendsRequest=async(req,res,next)=>{
 		next(error);
 	}
 }
+
+export const getUserProfile = async (req, res, next) => {
+	const { clerkId } = req.params;
+	try {
+		const user = await User.findOne({ clerkId }).populate('likedSongs');
+		if (!user) {
+			return res.status(404).json({ message: 'User not found' });
+		}
+
+        // Fetch playlists manually since they might not be linked in the user document
+        const playlists = await Playlist.find({ clerkId });
+        
+        const userObj = user.toObject();
+        userObj.playlists = playlists;
+
+		res.status(200).json(userObj);
+	} catch (error) {
+		console.error('error in getting user profile', error);
+		res.status(500).json({ message: 'Internal server error' });
+		next(error);
+	}
+};
 

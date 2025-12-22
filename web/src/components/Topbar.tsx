@@ -59,6 +59,11 @@ const Topbar = () => {
                 <SignedOut>
                     <SignedInAuthButton />
                 </SignedOut>
+                
+                <Link to={`/profile/${user?.user?.id}`} className='flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity mr-2'>
+                    <span className='text-sm font-medium text-white hidden sm:block'>{user?.user?.fullName}</span>
+                </Link>
+
                 <UserButton />
             </div>
         </div>

@@ -4,6 +4,7 @@ import { useMusicStore } from '@/stores/useMusicStore';
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Heart, Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from 'lucide-react';
 import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom';
 
 
 const formatTime = (seconds: number) => {
@@ -149,7 +150,9 @@ const handleLikeSong = async () => {
 				{/* volume controls */}
 				<div className='hidden sm:flex items-center gap-4 min-w-[180px] w-[30%] justify-end'>
 					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
-						<Mic2 className='h-4 w-4' />
+                        <Link to={'/lyrics'}>
+						    <Mic2 className='h-4 w-4' />
+                        </Link>
 					</Button>
 					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
 						<ListMusic className='h-4 w-4' />
