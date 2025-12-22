@@ -15,7 +15,7 @@ const formatTime = (seconds: number) => {
 
 const PlayBackControls = () => {
     const { isPlaying, currentSong, togglePlay, playNext, playPrevious } = usePlayerStore()
-	const { likeSong,isLoading,error } = useMusicStore();
+	const { likeSong } = useMusicStore();
     const [volume, setVolume] = React.useState(50);
     const [currentTime, setCurrentTime] = React.useState(0);
     const [duration, setDuration] = React.useState(0);

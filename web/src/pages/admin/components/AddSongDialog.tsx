@@ -15,6 +15,7 @@ import { useMusicStore } from "@/stores/useMusicStore";
 import { Plus, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 interface NewSong {
 	title: string;
@@ -81,9 +82,10 @@ const AddSongDialog = () => {
 				image: null,
 			});
 			toast.success("Song added successfully");
-		} catch (error: any) {
+		} catch (error) {
             console.log("Error in AddSongDialog", error);
-			toast.error("Failed to add song: " + error.message);
+			const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to add song";
+			toast.error(message);
 		} finally {
 			setIsLoading(false);
 		}

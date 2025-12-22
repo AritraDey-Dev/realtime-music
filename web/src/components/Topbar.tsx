@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, SignOutButton, UserButton, useUser } from '@clerk/clerk-react'
-import { LayoutDashboardIcon, Search } from 'lucide-react'
+import { LayoutDashboardIcon, Search, Sparkles } from 'lucide-react'
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SignedInAuthButton from './SignedInAuthButton'
@@ -62,6 +62,10 @@ const Topbar = () => {
                 
                 <Link to={`/profile/${user?.user?.id}`} className='flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity mr-2'>
                     <span className='text-sm font-medium text-white hidden sm:block'>{user?.user?.fullName}</span>
+                </Link>
+
+                <Link to="/ai" className='p-2 hover:bg-zinc-800 rounded-full transition-colors'>
+                    <Sparkles className='size-5 text-emerald-500' />
                 </Link>
 
                 <UserButton />

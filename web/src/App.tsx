@@ -1,20 +1,17 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { AuthenticateWithRedirectCallback, SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
-import { Button } from './components/ui/button';
-import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/home/Homepage';
-import AuthCallbackPage from './pages/auth-callback/AuthCallback';
+import { AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
+import { Route, Routes } from 'react-router-dom';
+import './App.css';
 import MainLayout from './Layout/mainLayout';
-import ChatPage from './pages/chatPage/ChatPage';
-import AlbumPage from './pages/album/AlbumPage';
 import AdminPage from './pages/admin/AdminPage';
+import AIPage from './pages/ai/AIPage';
+import AlbumPage from './pages/album/AlbumPage';
+import AuthCallbackPage from './pages/auth-callback/AuthCallback';
+import ChatPage from './pages/chatPage/ChatPage';
+import HomePage from './pages/home/Homepage';
 import { Toaster } from 'react-hot-toast';
 import PlaylistPage from './pages/playlist/Playlist';
-import SearchPage from './pages/search/SearchPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import SearchPage from './pages/search/SearchPage';
 
 function App() {
 
@@ -38,6 +35,7 @@ function App() {
           <Route path="/playlists/:id" element={<PlaylistPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/ai" element={<AIPage />} />
       </Route>
     </Routes>
     <Toaster/>

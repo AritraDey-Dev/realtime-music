@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/stores/useAuthStore';
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import Header from './components/Header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Album, Music } from 'lucide-react';

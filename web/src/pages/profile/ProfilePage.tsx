@@ -1,16 +1,18 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useUser } from '@clerk/clerk-react';
 import { Loader, Music, UserIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { axiosInstance } from '@/lib/axios';
 import { Playlist, User } from '@/types';
 
+interface UserProfile extends Omit<User, 'playlists'> {
+    playlists: Playlist[];
+}
+
 const ProfilePage = () => {
     const { userId } = useParams();
-    const { user: currentUser } = useUser();
-    const [userProfile, setUserProfile] = useState<User | null>(null);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -81,7 +83,7 @@ const ProfilePage = () => {
                         <h2 className='text-2xl font-bold text-white mb-4'>Public Playlists</h2>
                         {userProfile.playlists && userProfile.playlists.length > 0 ? (
                             <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
-                                {userProfile.playlists.map((playlist: any) => (
+                                {userProfile.playlists.map((playlist: Playlist) => (
                                     <Link 
                                         to={`/playlists/${playlist._id}`}
                                         key={playlist._id} 

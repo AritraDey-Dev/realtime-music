@@ -14,7 +14,16 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const SortableSongRow = ({ song, index, isPlaying, currentSong, playAlbum, handleRemoveSong }: any) => {
+interface SortableSongRowProps {
+    song: Song;
+    index: number;
+    isPlaying: boolean;
+    currentSong: Song | null;
+    playAlbum: (songs: Song[], index: number) => void;
+    handleRemoveSong: (id: string) => void;
+}
+
+const SortableSongRow = ({ song, index, isPlaying, currentSong, playAlbum, handleRemoveSong }: SortableSongRowProps) => {
     const {
         attributes,
         listeners,

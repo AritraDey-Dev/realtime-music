@@ -1,6 +1,7 @@
 import { axiosInstance } from '@/lib/axios';
-import { Playlist } from '@/types';
+import { Playlist, Song } from '@/types';
 import {create} from 'zustand';
+import { AxiosError } from 'axios';
 
 interface PlaylistStore {
     isLoading: boolean;
@@ -29,8 +30,9 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
         try {
             const response = await axiosInstance.get('/playlists');
             set({ playlists: response.data.playlists });
-        } catch (error:any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to fetch playlists";
+            set({ error: message });
         } finally {
             set({ isLoading: false });
         }
@@ -42,8 +44,9 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
         try {
             const response = await axiosInstance.get(`/playlists/${id}`);
             set({ currentPlaylist: response.data.playlist });
-        } catch (error:any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to fetch playlist";
+            set({ error: message });
         } finally {
             set({ isLoading: false });
         }
@@ -54,8 +57,9 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
         try {
             await axiosInstance.post('/playlists/addtoPlaylist', { playlistId, songId });
             // Optionally refresh playlists or current playlist
-        } catch (error:any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to add song to playlist";
+            set({ error: message });
         } finally {
             set({ isLoading: false });
         }
@@ -66,8 +70,9 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
         try {
             await axiosInstance.post('/playlists/removeSongFromPlaylist', { playlistId, songId });
              // Optionally refresh playlists or current playlist
-        } catch (error:any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to remove song from playlist";
+            set({ error: message });
         } finally {
             set({ isLoading: false });
         }
@@ -78,8 +83,9 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
         try {
             await axiosInstance.delete(`/playlists/${id}`);
             set({ playlists: get().playlists.filter((playlist) => playlist._id !== id) });
-        } catch (error:any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to delete playlist";
+            set({ error: message });
         }
         finally {
             set({ isLoading: false });
@@ -96,8 +102,9 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
                 isPublic
             }); 
             set({ playlists: [...get().playlists, response.data.playlist] });
-        } catch (error:any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to create playlist";
+            set({ error: message });
         } finally {
             set({ isLoading: false });
         }
@@ -121,8 +128,9 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
                     p._id === id ? response.data.playlist : p
                 )
             });
-        } catch (error:any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to edit playlist";
+            set({ error: message });
         } finally {
             set({ isLoading: false });
         }
@@ -133,8 +141,9 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
         try {
             const response = await axiosInstance.get(`/playlists/${id}/songs`);
             set({ playlists: [response.data.playlist] });
-        } catch (error:any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to fetch playlist songs";
+            set({ error: message });
         } finally {
             set({ isLoading: false });
         }
@@ -147,14 +156,15 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
             // But currentPlaylist.songs is an array of objects, songIds is array of strings
             // So we need to reorder the objects based on the IDs
             const songMap = new Map(currentPlaylist.songs.map(s => [s._id, s]));
-            const newSongs = songIds.map(sid => songMap.get(sid)).filter(s => s !== undefined);
-            set({ currentPlaylist: { ...currentPlaylist, songs: newSongs as any } });
+            const newSongs = songIds.map(sid => songMap.get(sid)).filter((s): s is Song => s !== undefined);
+            set({ currentPlaylist: { ...currentPlaylist, songs: newSongs } });
         }
 
         try {
             await axiosInstance.put(`/playlists/${id}/order`, { songIds });
-        } catch (error: any) {
-            set({ error: error.response.data.message });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to reorder playlist";
+            set({ error: message });
             // Revert on error (optional, but good practice)
             if (currentPlaylist && currentPlaylist._id === id) {
                  set({ currentPlaylist });

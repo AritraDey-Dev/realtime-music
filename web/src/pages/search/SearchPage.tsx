@@ -1,6 +1,6 @@
 import { useMusicStore } from '@/stores/useMusicStore';
 import { usePlayerStore } from '@/stores/usePlayerStore';
-import { Album, Song } from '@/types';
+import { Album, Song, User } from '@/types';
 import { Play } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -13,7 +13,7 @@ const SearchPage = () => {
     const query = searchParams.get('query') || '';
     const { search, isLoading } = useMusicStore();
     const { playAlbum } = usePlayerStore();
-    const [results, setResults] = useState<{ songs: Song[]; albums: Album[]; users: any[] }>({
+    const [results, setResults] = useState<{ songs: Song[]; albums: Album[]; users: User[] }>({
         songs: [],
         albums: [],
         users: []

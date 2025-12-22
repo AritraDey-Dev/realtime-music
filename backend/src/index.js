@@ -8,6 +8,7 @@ import albumRouter from './routes/album.route.js';
 import statsRouter from './routes/stat.route.js';
 import playlistRouter from './routes/playlist.route.js';
 import searchRouter from './routes/search.route.js';
+import aiRoutes from './routes/ai.route.js';
 import connectDB from './lib/db.js';
 import {clerkMiddleware} from '@clerk/express';
 import fileUpload from 'express-fileupload';
@@ -57,6 +58,7 @@ app.use("/api/playlists",playlistRouter)
 app.use("/api/albums",albumRouter)
 app.use("/api/stats",statsRouter)
 app.use("/api/search",searchRouter)
+app.use("/api/ai", aiRoutes);
 
 app.use((err,req,res,next)=>{
     res.status(500).json({message: process.env.NODE_ENV==='production'?'Internal server error':err.message});

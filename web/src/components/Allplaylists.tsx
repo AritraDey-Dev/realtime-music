@@ -1,5 +1,5 @@
 import { usePlaylistStore } from '@/stores/usePlaylistStore';
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import PlaylistSkeleton from './skeletons/PlaylistSkeleton';
 import { Link } from 'react-router-dom';
 
