@@ -2,7 +2,7 @@ import { usePlaylistStore } from '@/stores/usePlaylistStore';
 import { usePlayerStore } from '@/stores/usePlayerStore';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, Pause, Trash2, MoreHorizontal, ListPlus, Edit, Globe, Lock, Search } from 'lucide-react';
+import { Play, Pause, Trash2, MoreHorizontal, ListPlus, Edit, Globe, Lock, Search, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -10,16 +10,92 @@ import { EditPlaylistModal } from '@/components/EditPlaylistModal';
 import { Input } from '@/components/ui/input';
 import { useMusicStore } from '@/stores/useMusicStore';
 import { Song } from '@/types';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+const SortableSongRow = ({ song, index, isPlaying, currentSong, playAlbum, handleRemoveSong }: any) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: song._id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className='group grid grid-cols-[16px_4fr_2fr_1fr] gap-4 items-center p-2 rounded-md hover:bg-white/5 transition-colors'
+        >
+            <div {...attributes} {...listeners} className='cursor-grab active:cursor-grabbing'>
+                 <GripVertical className='h-4 w-4 text-zinc-600 group-hover:text-zinc-400' />
+            </div>
+            
+            <div className='flex items-center gap-3'>
+                <div className='relative group/play'>
+                    <img src={song.imageUrl} alt={song.title} className='w-10 h-10 rounded' />
+                    <div 
+                        className={`absolute inset-0 flex items-center justify-center bg-black/40 ${isPlaying && currentSong?._id === song._id ? 'opacity-100' : 'opacity-0 group-hover/play:opacity-100'} transition-opacity cursor-pointer`}
+                        onClick={() => playAlbum([song], 0)}
+                    >
+                        {isPlaying && currentSong?._id === song._id ? (
+                             <Pause className='h-4 w-4 text-white' />
+                        ) : (
+                            <Play className='h-4 w-4 text-white' />
+                        )}
+                    </div>
+                </div>
+                <div>
+                    <div className='font-medium text-white'>{song.title}</div>
+                    <div className='text-sm text-zinc-400'>{song.artist}</div>
+                </div>
+            </div>
+            
+            <div className='text-sm text-zinc-400'>{song.albumId || 'Single'}</div>
+            
+            <div className='flex items-center justify-end gap-2'>
+                <span className='text-sm text-zinc-400'>{song.duration}s</span>
+                <Button
+                    variant='ghost'
+                    size='icon'
+                    className='opacity-0 group-hover:opacity-100 hover:text-red-500'
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveSong(song._id);
+                    }}
+                >
+                    <Trash2 className='h-4 w-4' />
+                </Button>
+            </div>
+        </div>
+    );
+};
 
 const Playlist = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { fetchPlaylistById, currentPlaylist, isLoading, removeSongFromPlaylist, deletePlaylist, addSongToPlaylist } = usePlaylistStore();
+    const { fetchPlaylistById, currentPlaylist, isLoading, removeSongFromPlaylist, deletePlaylist, addSongToPlaylist, reorderPlaylist } = usePlaylistStore();
     const { currentSong, isPlaying, playAlbum, addToQueue } = usePlayerStore();
     const { searchSongs } = useMusicStore();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<Song[]>([]);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     useEffect(() => {
         const search = async () => {
@@ -38,6 +114,21 @@ const Playlist = () => {
         if (id) {
             await addSongToPlaylist(id, songId);
             fetchPlaylistById(id);
+        }
+    };
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        
+        if (over && active.id !== over.id && currentPlaylist) {
+            const oldIndex = currentPlaylist.songs.findIndex((song) => song._id === active.id);
+            const newIndex = currentPlaylist.songs.findIndex((song) => song._id === over.id);
+            
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newOrder = arrayMove(currentPlaylist.songs, oldIndex, newIndex);
+                // Optimistic update handled by store, but we need to pass IDs
+                await reorderPlaylist(currentPlaylist._id, newOrder.map(s => s._id));
+            }
         }
     };
 
@@ -152,42 +243,30 @@ const Playlist = () => {
 
             {/* Songs List */}
             <ScrollArea className='flex-1 p-6'>
-                <div className='space-y-2'>
-                    {currentPlaylist.songs.map((song, index) => (
-                        <div
-                            key={song._id}
-                            className='group grid grid-cols-[16px_4fr_2fr_1fr] gap-4 items-center p-2 rounded-md hover:bg-white/5 transition-colors'
-                        >
-                            <span className='text-zinc-400 text-sm group-hover:hidden'>{index + 1}</span>
-                            <Play className='h-4 w-4 text-white hidden group-hover:block cursor-pointer' onClick={() => playAlbum(currentPlaylist.songs, index)} />
-                            
-                            <div className='flex items-center gap-3'>
-                                <img src={song.imageUrl} alt={song.title} className='w-10 h-10 rounded' />
-                                <div>
-                                    <div className='font-medium text-white'>{song.title}</div>
-                                    <div className='text-sm text-zinc-400'>{song.artist}</div>
-                                </div>
-                            </div>
-                            
-                            <div className='text-sm text-zinc-400'>{song.albumId || 'Single'}</div>
-                            
-                            <div className='flex items-center justify-end gap-2'>
-                                <span className='text-sm text-zinc-400'>{song.duration}s</span>
-                                <Button
-                                    variant='ghost'
-                                    size='icon'
-                                    className='opacity-0 group-hover:opacity-100 hover:text-red-500'
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRemoveSong(song._id);
-                                    }}
-                                >
-                                    <Trash2 className='h-4 w-4' />
-                                </Button>
-                            </div>
+                <DndContext 
+                    sensors={sensors} 
+                    collisionDetection={closestCenter} 
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext 
+                        items={currentPlaylist.songs.map(s => s._id)} 
+                        strategy={verticalListSortingStrategy}
+                    >
+                        <div className='space-y-2'>
+                            {currentPlaylist.songs.map((song, index) => (
+                                <SortableSongRow
+                                    key={song._id}
+                                    song={song}
+                                    index={index}
+                                    isPlaying={isPlaying}
+                                    currentSong={currentSong}
+                                    playAlbum={playAlbum}
+                                    handleRemoveSong={handleRemoveSong}
+                                />
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </SortableContext>
+                </DndContext>
 
                 <div className="mt-8 border-t border-white/5 pt-8">
                     <h2 className="text-xl font-bold mb-4">Let's find something for your playlist</h2>

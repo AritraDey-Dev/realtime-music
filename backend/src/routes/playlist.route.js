@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 const router = Router();
 
-import { addSongToPlaylist, createPlaylist, deletePlaylist, getAllPlaylists, getPlaylistById, getSongsInPlaylist, removeSongFromPlaylist, editPlaylist } from '../controller/playlist.controller.js';
+import { addSongToPlaylist, createPlaylist, deletePlaylist, getAllPlaylists, getPlaylistById, getSongsInPlaylist, removeSongFromPlaylist, editPlaylist, updatePlaylistOrder } from '../controller/playlist.controller.js';
 
 import { protectedRoute } from '../middleware/auth.middleware.js';
 
@@ -14,6 +14,7 @@ router.post('/removeSongFromPlaylist', protectedRoute, removeSongFromPlaylist);
 router.delete('/:id',protectedRoute,deletePlaylist);
 router.get('/:id/songs',protectedRoute,getSongsInPlaylist);
 router.put('/:id', protectedRoute, editPlaylist);
+router.put('/:id/order', protectedRoute, updatePlaylistOrder);
 
 
 export default router;

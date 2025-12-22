@@ -26,6 +26,7 @@ interface MusicStore {
 	getLikedSongs: () => Promise<void>;
 	likeSong: (id: string) => Promise<void>;
 	searchSongs: (query: string) => Promise<Song[]>;
+    search: (query: string) => Promise<{ songs: Song[]; albums: Album[]; users: any[] }>;
 }
 
 export const useMusicStore = create<MusicStore>((set) => ({
@@ -223,4 +224,16 @@ likeSong: async (id) => {
 			set({ isLoading: false });
 		}
 	},
+    search: async (query: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await axiosInstance.get(`/search?query=${query}`);
+            return response.data;
+        } catch (error: any) {
+            set({ error: error.response.data.message });
+            return { songs: [], albums: [], users: [] };
+        } finally {
+            set({ isLoading: false });
+        }
+    },
 }));

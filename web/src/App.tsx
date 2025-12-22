@@ -13,6 +13,7 @@ import AlbumPage from './pages/album/AlbumPage';
 import AdminPage from './pages/admin/AdminPage';
 import { Toaster } from 'react-hot-toast';
 import PlaylistPage from './pages/playlist/Playlist';
+import SearchPage from './pages/search/SearchPage';
 
 function App() {
 
@@ -34,6 +35,7 @@ function App() {
           <Route path='/chat' element={<ChatPage />} />
           <Route path='/albums/:id' element={<AlbumPage />} />
           <Route path="/playlists/:id" element={<PlaylistPage />} />
+          <Route path="/search" element={<SearchPage />} />
       </Route>
     </Routes>
     <Toaster/>

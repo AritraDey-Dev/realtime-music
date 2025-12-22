@@ -15,6 +15,7 @@ interface PlaylistStore {
     createPlaylist: (title:string,description:string,imageUrl:string, isPublic: boolean) => Promise<void>;
     editPlaylist: (id: string, title: string, description: string, isPublic: boolean) => Promise<void>;
     getPlaylistSongs: (id: string) => Promise<void>;
+    reorderPlaylist: (id: string, songIds: string[]) => Promise<void>;
     currentPlaylist: Playlist | null;
 }
 
@@ -136,6 +137,28 @@ export const usePlaylistStore = create<PlaylistStore>((set,get) => ({
             set({ error: error.response.data.message });
         } finally {
             set({ isLoading: false });
+        }
+    },
+    reorderPlaylist: async (id: string, songIds: string[]) => {
+        // Optimistic update
+        const currentPlaylist = get().currentPlaylist;
+        if (currentPlaylist && currentPlaylist._id === id) {
+            // We assume songIds matches the new order of songs in currentPlaylist
+            // But currentPlaylist.songs is an array of objects, songIds is array of strings
+            // So we need to reorder the objects based on the IDs
+            const songMap = new Map(currentPlaylist.songs.map(s => [s._id, s]));
+            const newSongs = songIds.map(sid => songMap.get(sid)).filter(s => s !== undefined);
+            set({ currentPlaylist: { ...currentPlaylist, songs: newSongs as any } });
+        }
+
+        try {
+            await axiosInstance.put(`/playlists/${id}/order`, { songIds });
+        } catch (error: any) {
+            set({ error: error.response.data.message });
+            // Revert on error (optional, but good practice)
+            if (currentPlaylist && currentPlaylist._id === id) {
+                 set({ currentPlaylist });
+            }
         }
     },
     setPlaylists: (playlists) => set({ playlists }),

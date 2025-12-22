@@ -152,3 +152,24 @@ export const editPlaylist = async (req, res, next) => {
         next(error);
     }
 }
+
+export const updatePlaylistOrder = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { songIds } = req.body;
+        const currentUserId = req.auth.userId;
+
+        const playlist = await Playlist.findOne({ _id: id, clerkId: currentUserId });
+        if (!playlist) {
+            return res.status(404).json({ message: 'Playlist not found' });
+        }
+
+        playlist.songs = songIds;
+        await playlist.save();
+        res.status(200).json({ message: 'Playlist order updated' });
+    } catch (error) {
+        console.error('error in updating playlist order', error);
+        res.status(500).json({ message: 'Internal server error' });
+        next(error);
+    }
+}
