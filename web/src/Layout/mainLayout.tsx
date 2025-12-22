@@ -5,9 +5,14 @@ import LeftSidebar from './components/LeftSidebar';
 import FriendsActivity from './components/FriensActivity';
 import AudioPlayer from './components/AudioPlayer';
 import PlayBackControls from './components/PlayBackControls';
+import { usePlayerStore } from '@/stores/usePlayerStore';
+import { useChatStore } from '@/stores/useChatStore';
 
 const MainLayout = () => {
     const [isMobile, setIsMobile] = useState(false);
+    const { currentSong, isPlaying } = usePlayerStore();
+    const { updateActivity } = useChatStore();
+
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 768);
@@ -18,6 +23,14 @@ const MainLayout = () => {
             window.removeEventListener('resize', checkMobile);
         }
     }, []);
+
+    useEffect(() => {
+        if (currentSong && isPlaying) {
+            updateActivity(`Playing ${currentSong.title} by ${currentSong.artist}`);
+        } else {
+            updateActivity("Idle");
+        }
+    }, [currentSong, isPlaying, updateActivity]);
        
 
     return (

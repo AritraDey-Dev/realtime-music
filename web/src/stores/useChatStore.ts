@@ -16,6 +16,7 @@ interface ChatStore {
     disconnectSocket: () => void;
     sendMessage: (receiverId: string, senderId: string, content: string) => void;
     fetchMessages: (userId: string) => Promise<void>;
+    updateActivity: (activity: string) => void;
     isLoading: boolean;
     setSelectedUser: (user: User | null) => void;
     error: string | null;
@@ -132,4 +133,9 @@ export const useChatStore = create<ChatStore>((set,get) => ({
 			set({ isLoading: false });
 		}
 	},
+    updateActivity: (activity: string) => {
+        const socket = get().socket;
+        if (!socket) return;
+        socket.emit("update_activity", { userId: get().selectedUser?._id, activity }); // userId is actually handled by backend via socket.id map usually, but let's check backend
+    },
 }));
