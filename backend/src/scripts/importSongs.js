@@ -15,7 +15,11 @@ const fetchSongsFromExternalSource = async () => {
     try {
         const url = `https://itunes.apple.com/search?term=${randomKeyword}&limit=100&entity=song&offset=${randomOffset}`;
         console.log(`🔗 Fetching ${randomKeyword} tracks (offset: ${randomOffset}) from: ${url}`);
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -28,15 +32,17 @@ const fetchSongsFromExternalSource = async () => {
             return [];
         }
 
-        return data.results.map(track => ({
+        const validSongs = data.results.filter(track => track.previewUrl && track.artworkUrl100).map(track => ({
             title: track.trackName,
             artist: track.artistName,
             // Get higher resolution artwork
             imageUrl: track.artworkUrl100.replace('100x100bb', '600x600bb'),
             audioUrl: track.previewUrl,
-            duration: Math.floor(track.trackTimeMillis / 1000),
+            duration: 30, // iTunes previews are 30 seconds
             lyrics: `Lyrics for ${track.trackName} by ${track.artistName} are coming soon! Enjoy this preview.`,
         }));
+
+        return validSongs;
     } catch (error) {
         console.error("❌ Error fetching from iTunes:", error);
         return [];
@@ -51,7 +57,7 @@ export const runImport = async () => {
         }
 
         const newSongs = await fetchSongsFromExternalSource();
-        console.log(`📥 Fetched ${newSongs.length} songs from iTunes.`);
+        console.log(`📥 Fetched ${newSongs.length} valid songs from iTunes.`);
 
         if (newSongs.length === 0) {
             console.log("⚠️ No songs to import.");
@@ -60,16 +66,22 @@ export const runImport = async () => {
 
         let addedCount = 0;
         let skippedCount = 0;
+        let errorCount = 0;
 
         for (const song of newSongs) {
-            // Check if song already exists by title and artist to avoid duplicates
-            const exists = await Song.findOne({ title: song.title, artist: song.artist });
-            if (!exists) {
-                await Song.create(song);
-                // console.log(`✨ Added: ${song.title} by ${song.artist}`);
-                addedCount++;
-            } else {
-                skippedCount++;
+            try {
+                // Check if song already exists by title and artist to avoid duplicates
+                const exists = await Song.findOne({ title: song.title, artist: song.artist });
+                if (!exists) {
+                    await Song.create(song);
+                    // console.log(`✨ Added: ${song.title} by ${song.artist}`);
+                    addedCount++;
+                } else {
+                    skippedCount++;
+                }
+            } catch (err) {
+                console.error(`❌ Failed to add song ${song.title}:`, err.message);
+                errorCount++;
             }
         }
 

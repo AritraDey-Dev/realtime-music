@@ -116,6 +116,6 @@ const AudioPlayer = () => {
         return () => { socket.off("player_sync", handleSync); };
     }, [socket, roomId, isHost]);
 
-	return <audio ref={audioRef} />;
+	return <audio ref={audioRef} crossOrigin="anonymous" />;
 };
 export default AudioPlayer;
