@@ -11,7 +11,7 @@ export const initializeSocket = (server) => {
 
 	const userSockets = new Map(); // { userId: socketId}
 	const userActivities = new Map(); // {userId: activity}
-    const parties = new Map(); // { roomId: { hostId, users: Set<userId>, currentSong, isPlaying, currentTime } }
+    const parties = new Map(); // { roomId: { hostId, users: Set<userId>, currentSong, isPlaying, currentTime, votingQueue: [{song, votes: Set<userId>}] } }
 
 	io.on("connection", (socket) => {
 		console.log("New socket connection", socket.id);
@@ -41,7 +41,8 @@ export const initializeSocket = (server) => {
                 users: new Set([userId]),
                 currentSong: null,
                 isPlaying: false,
-                currentTime: 0
+                currentTime: 0,
+                votingQueue: []
             });
             
             socket.join(roomId);
@@ -57,6 +58,11 @@ export const initializeSocket = (server) => {
                 socket.emit("party_joined", { roomId, hostId: party.hostId });
                 
                 // Sync new user with current state
+                socket.emit("party_sync", {
+                    users: Array.from(party.users),
+                    votingQueue: party.votingQueue.map(item => ({...item, votes: Array.from(item.votes)}))
+                });
+
                 if (party.currentSong) {
                     socket.emit("player_sync", {
                         action: "sync",
@@ -65,6 +71,10 @@ export const initializeSocket = (server) => {
                         currentTime: party.currentTime
                     });
                 }
+                
+                // Notify others
+                io.to(roomId).emit("party_users_updated", Array.from(party.users));
+
                 console.log(`User ${userId} joined party ${roomId}`);
             } else {
                 socket.emit("party_error", "Party not found");
@@ -86,6 +96,46 @@ export const initializeSocket = (server) => {
                     isPlaying,
                     currentTime
                 });
+            }
+        });
+
+        socket.on("add_to_vote", ({ roomId, song }) => {
+            const party = parties.get(roomId);
+            if (party) {
+                // Check if song already exists
+                if (!party.votingQueue.some(item => item.song._id === song._id)) {
+                    party.votingQueue.push({ song, votes: new Set() });
+                    io.to(roomId).emit("party_vote_update", party.votingQueue.map(item => ({...item, votes: Array.from(item.votes)})));
+                }
+            }
+        });
+
+        socket.on("vote_song", ({ roomId, songId, userId }) => {
+            const party = parties.get(roomId);
+            if (party) {
+                const item = party.votingQueue.find(i => i.song._id === songId);
+                if (item) {
+                    if (item.votes.has(userId)) {
+                        item.votes.delete(userId);
+                    } else {
+                        item.votes.add(userId);
+                    }
+                    // Sort by votes
+                    party.votingQueue.sort((a, b) => b.votes.size - a.votes.size);
+                    
+                    io.to(roomId).emit("party_vote_update", party.votingQueue.map(item => ({...item, votes: Array.from(item.votes)})));
+                }
+            }
+        });
+
+        socket.on("remove_from_vote", ({ roomId, songId }) => {
+            const party = parties.get(roomId);
+            if (party) {
+                const index = party.votingQueue.findIndex(i => i.song._id === songId);
+                if (index !== -1) {
+                    party.votingQueue.splice(index, 1);
+                    io.to(roomId).emit("party_vote_update", party.votingQueue.map(item => ({...item, votes: Array.from(item.votes)})));
+                }
             }
         });
 

@@ -8,7 +8,9 @@
     "start": "node src/index.js",
     "seed:songs": "node src/seeds/songs.js",
     "seed:albums": "node src/seeds/albums.js",
-    "db:seed": "npm run seed:songs && npm run seed:albums"
+    "db:seed": "npm run seed:songs && npm run seed:albums",
+    "cron": "node src/cron.js",
+    "import:songs": "node src/scripts/importSongs.js"
   },
   "keywords": [],
   "author": "",

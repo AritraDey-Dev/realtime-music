@@ -8,9 +8,9 @@ const AudioPlayer = () => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const prevSongRef = useRef<string | null>(null);
 
-	const { currentSong, isPlaying, playNext } = usePlayerStore();
+	const { currentSong, isPlaying, playNext, setCurrentSong } = usePlayerStore();
 	const { setAnalyser } = useVisualizerStore();
-    const { roomId, isHost, syncPlayer } = usePartyStore();
+    const { roomId, isHost, syncPlayer, votingQueue } = usePartyStore();
     const { socket } = useChatStore();
 	const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -45,13 +45,20 @@ const AudioPlayer = () => {
 		const audio = audioRef.current;
 
 		const handleEnded = () => {
-			playNext();
+            if (isHost && votingQueue.length > 0) {
+                const nextSong = votingQueue[0].song;
+                setCurrentSong(nextSong);
+                // Remove from voting queue
+                socket?.emit("remove_from_vote", { roomId, songId: nextSong._id });
+            } else {
+			    playNext();
+            }
 		};
 
 		audio?.addEventListener("ended", handleEnded);
 
 		return () => audio?.removeEventListener("ended", handleEnded);
-	}, [playNext]);
+	}, [playNext, isHost, votingQueue, setCurrentSong]);
 
 	useEffect(() => {
 		if (!audioRef.current || !currentSong) return;

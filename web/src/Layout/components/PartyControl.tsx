@@ -3,12 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { usePartyStore } from "@/stores/usePartyStore";
 import { useUser } from "@clerk/clerk-react";
-import { Copy, Music2, Users, LogOut } from "lucide-react";
+import { Users } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { PartyRoom } from "./PartyRoom";
 
 export const PartyControl = () => {
-    const { roomId, createParty, joinParty, leaveParty } = usePartyStore();
+    const { roomId, createParty, joinParty } = usePartyStore();
     const { user } = useUser();
     const [joinRoomId, setJoinRoomId] = useState("");
 
@@ -20,29 +20,8 @@ export const PartyControl = () => {
         if (user && joinRoomId) joinParty(joinRoomId, user.id);
     };
 
-    const copyRoomId = () => {
-        if (roomId) {
-            navigator.clipboard.writeText(roomId);
-            toast.success("Room ID copied!");
-        }
-    };
-
     if (roomId) {
-        return (
-            <div className="flex items-center gap-2 px-2 py-2 text-white bg-zinc-800/50 rounded-md mt-2">
-                <Music2 className="size-5 text-emerald-500 animate-pulse" />
-                <div className="flex-1 min-w-0 hidden md:block">
-                    <p className="text-sm font-medium truncate">Party Active</p>
-                    <p className="text-xs text-zinc-400 truncate">ID: {roomId}</p>
-                </div>
-                <Button size="icon" variant="ghost" className="h-8 w-8 hover:text-white" onClick={copyRoomId} title="Copy ID">
-                    <Copy className="size-4" />
-                </Button>
-                <Button size="icon" variant="destructive" className="h-8 w-8" onClick={leaveParty} title="Leave Party">
-                    <LogOut className="size-4" />
-                </Button>
-            </div>
-        );
+        return <PartyRoom />;
     }
 
     return (
