@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatStore } from '@/stores/useChatStore';
+import { usePlayerStore } from '@/stores/usePlayerStore';
 import { useUser } from '@clerk/clerk-react';
 import { HeadphonesIcon, Music, Users } from 'lucide-react';
 import { useEffect } from 'react'
@@ -11,7 +12,6 @@ const FriendsActivity = () => {
     useEffect(() => {
        if(user) fetchUsers();
     }, [fetchUsers, user]);
-   console.log("users",users);
   return (
 <div className='h-full bg-zinc-900 rounded-lg flex flex-col'>
 
@@ -28,14 +28,42 @@ const FriendsActivity = () => {
 			<ScrollArea className='flex-1'>
 				<div className='p-4 space-y-4'>
 					{users.map((user) => {
-						const activity = userActivities.get(user.clerkId);
-						console.log("activity",activity);
-						const isPlaying = activity && activity !== "Idle";
+						const activityStr = userActivities.get(user.clerkId);
+                        let isPlaying = false;
+                        let songTitle = "";
+                        let songArtist = "";
+                        let currentSong = null;
+
+                        try {
+                            if (activityStr && activityStr !== "Idle") {
+                                const activity = JSON.parse(activityStr);
+                                if (activity.type === "playing") {
+                                    isPlaying = true;
+                                    songTitle = activity.title;
+                                    songArtist = activity.artist;
+                                    currentSong = activity.song;
+                                }
+                            }
+                        } catch (e) {
+                            // Fallback for old string format if any
+                            if (activityStr && activityStr !== "Idle" && activityStr.startsWith("Playing ")) {
+                                isPlaying = true;
+                                const parts = activityStr.replace("Playing ", "").split(" by ");
+                                songTitle = parts[0];
+                                songArtist = parts[1];
+                            }
+                        }
 
 						return (
 							<div
 								key={user._id}
 								className='cursor-pointer hover:bg-zinc-800/50 p-3 rounded-md transition-colors group'
+                                onClick={() => {
+                                    if (isPlaying && currentSong) {
+                                        usePlayerStore.getState().setCurrentSong(currentSong);
+                                        usePlayerStore.getState().togglePlay();
+                                    }
+                                }}
 							>
 								<div className='flex items-start gap-3'>
 									<div className='relative'>
@@ -60,10 +88,10 @@ const FriendsActivity = () => {
 										{isPlaying ? (
 											<div className='mt-1'>
 												<div className='mt-1 text-sm text-white font-medium truncate'>
-													{activity.replace("Playing ", "").split(" by ")[0]}
+													{songTitle}
 												</div>
 												<div className='text-xs text-zinc-400 truncate'>
-													{activity.split(" by ")[1]}
+													{songArtist}
 												</div>
 											</div>
 										) : (

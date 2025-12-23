@@ -12,6 +12,7 @@ interface ChatStore {
     userActivities: Map<string, string>;
     messages: Message[];
     selectedUser: User | null;
+    currentUserId: string | null;
 
     fetchUsers: () => Promise<void>;
     initSocket: (userId: string) => void;
@@ -41,6 +42,7 @@ export const useChatStore = create<ChatStore>((set,get) => ({
 	userActivities: new Map(),
 	messages: [],
 	selectedUser: null,
+    currentUserId: null,
 
 	setSelectedUser: (user) => set({ selectedUser: user }),
 
@@ -59,6 +61,7 @@ export const useChatStore = create<ChatStore>((set,get) => ({
 
 	initSocket: (userId) => {
 		console.log("Initializing socket");
+        set({ currentUserId: userId });
 		if (!get().isConnected) {
 			socket.auth = { userId };
 			socket.connect();
@@ -140,6 +143,13 @@ export const useChatStore = create<ChatStore>((set,get) => ({
     updateActivity: (activity: string) => {
         const socket = get().socket;
         if (!socket) return;
-        socket.emit("update_activity", { userId: get().selectedUser?._id, activity }); // userId is actually handled by backend via socket.id map usually, but let's check backend
+        // We need the current user's ID. 
+        // Since we don't store it explicitly in the store yet, let's assume the backend can identify the user by socket.id if we don't send userId, 
+        // OR we should store userId in initSocket.
+        // Let's add userId to the store state.
+        const userId = get().currentUserId;
+        if (userId) {
+            socket.emit("update_activity", { userId, activity });
+        }
     },
 }));

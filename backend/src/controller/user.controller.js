@@ -110,28 +110,182 @@ if (isLiked) {
     }
 };
 
-export const friendsRequest=async(req,res,next)=>{
-	try {
-		const {id}=req.params;
-		const user=await User.findById(id);
-		if(!user){
-			return res.status(404).json({message:'User not found'});
-		}
-		const {friendId}=req.body;
-		const friend=await User.findById(friendId);
-		if(!friend){
-			return res.status(404).json({message:'Friend not found'});
-		}
-		user.friends.push(friendId);
-		friend.friends.push(id);
-		await Promise.all([user.save(),friend.save()]);
-		res.status(200).json({message:'Friend request sent'});
-	} catch (error) {
-		console.error('error in friends request',error);
-		res.status(500).json({message:'Internal server error'});
-		next(error);
-	}
-}
+export const sendFriendRequest = async (req, res, next) => {
+    try {
+        const { targetUserId } = req.params;
+        const currentClerkId = req.auth.userId;
+
+        const currentUser = await User.findOne({ clerkId: currentClerkId });
+        const targetUser = await User.findById(targetUserId);
+
+        if (!currentUser || !targetUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (currentUser._id.toString() === targetUserId) {
+            return res.status(400).json({ message: 'Cannot send friend request to yourself' });
+        }
+
+        // Check if already friends or request pending
+        const existingRequest = targetUser.friendRequests.find(
+            (req) => req.senderId.toString() === currentUser._id.toString() && req.status === 'pending'
+        );
+
+        if (existingRequest) {
+            return res.status(400).json({ message: 'Friend request already sent' });
+        }
+
+        const alreadyFriends = currentUser.friends.includes(targetUserId);
+        if (alreadyFriends) {
+            return res.status(400).json({ message: 'Already friends' });
+        }
+
+        targetUser.friendRequests.push({ senderId: currentUser._id });
+        await targetUser.save();
+
+        res.status(200).json({ message: 'Friend request sent' });
+    } catch (error) {
+        console.error('error in sending friend request', error);
+        res.status(500).json({ message: 'Internal server error' });
+        next(error);
+    }
+};
+
+export const acceptFriendRequest = async (req, res, next) => {
+    try {
+        const { requesterId } = req.body;
+        const currentClerkId = req.auth.userId;
+
+        const currentUser = await User.findOne({ clerkId: currentClerkId });
+        const requester = await User.findById(requesterId);
+
+        if (!currentUser || !requester) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const request = currentUser.friendRequests.find(
+            (req) => req.senderId.toString() === requesterId && req.status === 'pending'
+        );
+
+        if (!request) {
+            return res.status(404).json({ message: 'Friend request not found' });
+        }
+
+        request.status = 'accepted';
+        currentUser.friends.push(requesterId);
+        requester.friends.push(currentUser._id);
+
+        await Promise.all([currentUser.save(), requester.save()]);
+
+        res.status(200).json({ message: 'Friend request accepted' });
+    } catch (error) {
+        console.error('error in accepting friend request', error);
+        res.status(500).json({ message: 'Internal server error' });
+        next(error);
+    }
+};
+
+export const rejectFriendRequest = async (req, res, next) => {
+    try {
+        const { requesterId } = req.body;
+        const currentClerkId = req.auth.userId;
+
+        const currentUser = await User.findOne({ clerkId: currentClerkId });
+
+        if (!currentUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const request = currentUser.friendRequests.find(
+            (req) => req.senderId.toString() === requesterId && req.status === 'pending'
+        );
+
+        if (!request) {
+            return res.status(404).json({ message: 'Friend request not found' });
+        }
+
+        request.status = 'rejected';
+        await currentUser.save();
+
+        res.status(200).json({ message: 'Friend request rejected' });
+    } catch (error) {
+        console.error('error in rejecting friend request', error);
+        res.status(500).json({ message: 'Internal server error' });
+        next(error);
+    }
+};
+
+export const followUser = async (req, res, next) => {
+    try {
+        const { targetUserId } = req.params;
+        const currentClerkId = req.auth.userId;
+
+        const currentUser = await User.findOne({ clerkId: currentClerkId });
+        const targetUser = await User.findById(targetUserId);
+
+        if (!currentUser || !targetUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (currentUser.following.includes(targetUserId)) {
+            return res.status(400).json({ message: 'Already following' });
+        }
+
+        currentUser.following.push(targetUserId);
+        targetUser.followers.push(currentUser._id);
+
+        await Promise.all([currentUser.save(), targetUser.save()]);
+
+        res.status(200).json({ message: 'User followed' });
+    } catch (error) {
+        console.error('error in following user', error);
+        res.status(500).json({ message: 'Internal server error' });
+        next(error);
+    }
+};
+
+export const unfollowUser = async (req, res, next) => {
+    try {
+        const { targetUserId } = req.params;
+        const currentClerkId = req.auth.userId;
+
+        const currentUser = await User.findOne({ clerkId: currentClerkId });
+        const targetUser = await User.findById(targetUserId);
+
+        if (!currentUser || !targetUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        currentUser.following = currentUser.following.filter(id => id.toString() !== targetUserId);
+        targetUser.followers = targetUser.followers.filter(id => id.toString() !== currentUser._id.toString());
+
+        await Promise.all([currentUser.save(), targetUser.save()]);
+
+        res.status(200).json({ message: 'User unfollowed' });
+    } catch (error) {
+        console.error('error in unfollowing user', error);
+        res.status(500).json({ message: 'Internal server error' });
+        next(error);
+    }
+};
+
+export const getFriendRequests = async (req, res, next) => {
+    try {
+        const currentClerkId = req.auth.userId;
+        const currentUser = await User.findOne({ clerkId: currentClerkId }).populate('friendRequests.senderId');
+
+        if (!currentUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const pendingRequests = currentUser.friendRequests.filter(req => req.status === 'pending');
+        res.status(200).json(pendingRequests);
+    } catch (error) {
+        console.error('error in getting friend requests', error);
+        res.status(500).json({ message: 'Internal server error' });
+        next(error);
+    }
+};
 
 export const getUserProfile = async (req, res, next) => {
 	const { clerkId } = req.params;

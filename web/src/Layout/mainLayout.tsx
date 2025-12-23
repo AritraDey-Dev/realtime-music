@@ -7,13 +7,15 @@ import AudioPlayer from './components/AudioPlayer';
 import PlayBackControls from './components/PlayBackControls';
 import { usePlayerStore } from '@/stores/usePlayerStore';
 import { useChatStore } from '@/stores/useChatStore';
+import { useUser } from '@clerk/clerk-react';
 
 import AudioVisualizer from '@/components/AudioVisualizer';
 
 const MainLayout = () => {
     const [isMobile, setIsMobile] = useState(false);
     const { currentSong, isPlaying } = usePlayerStore();
-    const { updateActivity } = useChatStore();
+    const { user } = useUser();
+    const { updateActivity, initSocket, disconnectSocket } = useChatStore();
 
     useEffect(() => {
         const checkMobile = () => {
@@ -27,10 +29,23 @@ const MainLayout = () => {
     }, []);
 
     useEffect(() => {
-        if (currentSong && isPlaying) {
-            updateActivity(`Playing ${currentSong.title} by ${currentSong.artist}`);
+        if (user) {
+            initSocket(user.id);
         } else {
-            updateActivity("Idle");
+            disconnectSocket();
+        }
+    }, [initSocket, disconnectSocket, user]);
+
+    useEffect(() => {
+        if (currentSong && isPlaying) {
+            updateActivity(JSON.stringify({
+                type: "playing",
+                song: currentSong,
+                title: currentSong.title,
+                artist: currentSong.artist
+            }));
+        } else {
+            updateActivity(JSON.stringify({ type: "idle" }));
         }
     }, [currentSong, isPlaying, updateActivity]);
        

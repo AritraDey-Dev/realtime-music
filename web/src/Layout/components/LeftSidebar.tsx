@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { useMusicStore } from '@/stores/useMusicStore'
 import { SignedIn } from '@clerk/clerk-react'
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Album, HomeIcon, MessageCircle } from 'lucide-react'
+import { Album, HomeIcon, MessageCircle, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CreatePlaylistButton } from '@/components/CreatePlaylistButton'
@@ -45,6 +45,18 @@ const LeftSidebar = () => {
                         >
                             <MessageCircle className='mr-2 size-5' />
                             <span className='hidden md:inline text-white'>Messages</span>
+                        </Link>
+                        <Link
+                            to={"/social"}
+                            className={cn(
+                                buttonVariants({
+                                    variant: "ghost",
+                                    className: "w-full justify-start text-white hover:bg-zinc-800",
+                                })
+                            )}
+                        >
+                            <Users className='mr-2 size-5' />
+                            <span className='hidden md:inline text-white'>Social</span>
                         </Link>
                         <PartyControl />
                     </SignedIn>

@@ -22,14 +22,34 @@ playlists: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Playlist',
 }],
-friends: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-}],
-friends: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-}],
+    friends: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }],
+    followers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }],
+    following: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }],
+    friendRequests: [{
+        senderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'accepted', 'rejected'],
+            default: 'pending',
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+        }
+    }],
 },{timestamps: true});
 
 export const User = mongoose.model('User', userSchema);

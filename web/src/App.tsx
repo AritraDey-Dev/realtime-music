@@ -12,6 +12,7 @@ import { Toaster } from 'react-hot-toast';
 import PlaylistPage from './pages/playlist/Playlist';
 import ProfilePage from './pages/profile/ProfilePage';
 import SearchPage from './pages/search/SearchPage';
+import SocialPage from './pages/social/SocialPage';
 
 function App() {
 
@@ -35,6 +36,7 @@ function App() {
           <Route path="/playlists/:id" element={<PlaylistPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/social" element={<SocialPage />} />
           <Route path="/ai" element={<AIPage />} />
       </Route>
     </Routes>
