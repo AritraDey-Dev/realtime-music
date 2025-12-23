@@ -13,6 +13,7 @@ import PlaylistPage from './pages/playlist/Playlist';
 import ProfilePage from './pages/profile/ProfilePage';
 import SearchPage from './pages/search/SearchPage';
 import SocialPage from './pages/social/SocialPage';
+import SongsPage from './pages/songs/SongsPage';
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/social" element={<SocialPage />} />
+          <Route path="/songs" element={<SongsPage />} />
           <Route path="/ai" element={<AIPage />} />
       </Route>
     </Routes>

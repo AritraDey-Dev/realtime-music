@@ -6,6 +6,7 @@ import PlayButton from './PlayButton';
 import { AddPlaylistDialog } from '@/components/AddPlaylistDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ListPlus, MoreHorizontal } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 type SectionGridProps = {
 title: string;
@@ -29,9 +30,11 @@ const SectionGrid = ({songs,title,isLoading}:SectionGridProps) => {
     )}
     <div className='flex items-center justify-between mb-4'>
         <h2 className='text-xl sm:text-2xl font-bold'>{title}</h2>
-        <Button variant='link' className='text-sm text-zinc-400 hover:text-white'>
-            Show all
-        </Button>
+        <Link to="/songs">
+            <Button variant='link' className='text-sm text-zinc-400 hover:text-white'>
+                Show all
+            </Button>
+        </Link>
     </div>
 
     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>

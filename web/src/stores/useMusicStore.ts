@@ -28,6 +28,7 @@ interface MusicStore {
 	likeSong: (id: string) => Promise<void>;
 	searchSongs: (query: string) => Promise<Song[]>;
     search: (query: string) => Promise<{ songs: Song[]; albums: Album[]; users: User[] }>;
+    fetchAllSongs: () => Promise<void>;
 }
 
 export const useMusicStore = create<MusicStore>((set) => ({
@@ -245,6 +246,18 @@ likeSong: async (id) => {
 			const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to search";
             set({ error: message });
             return { songs: [], albums: [], users: [] };
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+    fetchAllSongs: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await axiosInstance.get("/songs/all");
+            set({ songs: response.data.songs });
+        } catch (error) {
+            const message = (error as AxiosError<{ message: string }>).response?.data?.message || "Failed to fetch all songs";
+            set({ error: message });
         } finally {
             set({ isLoading: false });
         }

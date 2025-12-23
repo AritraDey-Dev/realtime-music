@@ -12,6 +12,17 @@ export const getAllSongs = async (req, res, next) => {
     }
 }
 
+export const getAllSongsPublic = async (req, res, next) => {
+    try {
+        const songs = await Song.find().sort({ createdAt: -1 });
+        res.status(200).json({ songs });
+    } catch (error) {
+        console.error('error in getting all public songs', error);
+        res.status(500).json({ message: 'Internal server error' });
+        next(error);
+    }
+}
+
 export const getFeaturedSongs = async (req, res, next) => {
     try {
         const songs = await Song.aggregate([

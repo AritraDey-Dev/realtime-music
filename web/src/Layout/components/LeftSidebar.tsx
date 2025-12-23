@@ -13,7 +13,6 @@ import { PartyControl } from './PartyControl';
 
 const LeftSidebar = () => {
     const { albums,fetchAlbums,isLoading}=useMusicStore();
-    console.log(albums)
     useEffect(() => {
         fetchAlbums();
     }, [fetchAlbums]);
